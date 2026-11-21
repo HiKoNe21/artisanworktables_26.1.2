@@ -1,0 +1,24 @@
+{
+    "type": "artwork:basic_shaped",
+    "key": {
+        "X": "minecraft:flint",
+        "#": "#c:rods/wooden",
+        "Y": "minecraft:feather"
+    },
+    "pattern": [
+        "X",
+        "#",
+        "Y"
+    ],
+    "secondary": [
+        {
+            "ingredient": "minecraft:diamond",
+            "count": 2
+        }
+    ],
+    "sound": "minecraft:block.beehive.enter",
+    "result": {
+        "count": 8,
+        "id": "minecraft:arrow"
+    }
+}

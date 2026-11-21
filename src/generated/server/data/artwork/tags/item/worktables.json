@@ -1,0 +1,19 @@
+{
+  "values": [
+    "artwork:worktable_tailor",
+    "artwork:worktable_carpenter",
+    "artwork:worktable_mason",
+    "artwork:worktable_blacksmith",
+    "artwork:worktable_jeweler",
+    "artwork:worktable_basic",
+    "artwork:worktable_engineer",
+    "artwork:worktable_mage",
+    "artwork:worktable_scribe",
+    "artwork:worktable_chemist",
+    "artwork:worktable_farmer",
+    "artwork:worktable_chef",
+    "artwork:worktable_designer",
+    "artwork:worktable_tanner",
+    "artwork:worktable_potter"
+  ]
+}

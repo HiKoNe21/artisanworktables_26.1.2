@@ -1,0 +1,25 @@
+{
+    "type": "artwork:basic_shapeless",
+    "tier": [ 1 ],
+    "ingredients": [
+        "minecraft:bucket"
+    ],
+    "secondary": [
+        {
+            "ingredient": "minecraft:egg",
+            "count": 1,
+            "catalyst": true
+        },
+        {
+            "ingredient": "minecraft:bone_meal",
+            "count": 4
+        }
+    ],
+    "experience": {
+        "required": 10
+    },
+    "result": {
+        "id": "minecraft:milk_bucket",
+        "count": 1
+    }
+}

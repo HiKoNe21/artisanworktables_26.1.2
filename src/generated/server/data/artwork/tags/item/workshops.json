@@ -1,0 +1,19 @@
+{
+  "values": [
+    "artwork:workshop_tailor",
+    "artwork:workshop_carpenter",
+    "artwork:workshop_mason",
+    "artwork:workshop_blacksmith",
+    "artwork:workshop_jeweler",
+    "artwork:workshop_basic",
+    "artwork:workshop_engineer",
+    "artwork:workshop_mage",
+    "artwork:workshop_scribe",
+    "artwork:workshop_chemist",
+    "artwork:workshop_farmer",
+    "artwork:workshop_chef",
+    "artwork:workshop_designer",
+    "artwork:workshop_tanner",
+    "artwork:workshop_potter"
+  ]
+}

@@ -5,20 +5,25 @@ import hikone.artwork.api.ids.AWTags;
 import hikone.artwork.init.AWBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.neoforged.neoforge.common.data.ItemTagsProvider;
-import org.jspecify.annotations.NonNull;
+import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
 public class AWItemTagsProvider extends ItemTagsProvider
 {
-    public AWItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
+    public AWItemTagsProvider(
+            PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
+            CompletableFuture<TagLookup<Block>> blockTags, @Nullable ExistingFileHelper existingFileHelper)
     {
-        super(output, lookupProvider, ArtWork.MODID);
+        super(output, lookupProvider, blockTags, ArtWork.MODID, existingFileHelper);
     }
 
     @Override
-    protected void addTags(HolderLookup.@NonNull Provider provider)
+    protected void addTags(HolderLookup.@NotNull Provider provider)
     {
         var allTablesTag = this.tag(AWTags.Items.ALL_TABLES);
 

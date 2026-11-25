@@ -1,0 +1,42 @@
+{
+    "type": "artwork:basic_shaped",
+    "key": {
+        "L": {
+            "item": "minecraft:emerald"
+        },
+        "W": {
+            "item": "minecraft:diamond"
+        }
+    },
+    "pattern": [
+        "LW"
+    ],
+    "secondary": [
+        {
+            "item": "minecraft:flint"
+        },
+        {
+            "item": "minecraft:brush",
+            "damage": 7
+        },
+        {
+            "item": "minecraft:fishing_rod",
+            "damage": 64
+        },
+        {
+            "item": "minecraft:shears",
+            "damage": 200
+        },
+        {
+            "item": "minecraft:diamond_pickaxe",
+            "damage": 1000
+        }
+    ],
+    "experience": {
+        "consume": 999
+    },
+    "result": {
+        "count": 1,
+        "id": "minecraft:crying_obsidian"
+    }
+}

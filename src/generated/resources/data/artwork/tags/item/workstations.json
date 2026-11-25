@@ -1,0 +1,19 @@
+{
+  "values": [
+    "artwork:workstation_tailor",
+    "artwork:workstation_carpenter",
+    "artwork:workstation_mason",
+    "artwork:workstation_blacksmith",
+    "artwork:workstation_jeweler",
+    "artwork:workstation_basic",
+    "artwork:workstation_engineer",
+    "artwork:workstation_mage",
+    "artwork:workstation_scribe",
+    "artwork:workstation_chemist",
+    "artwork:workstation_farmer",
+    "artwork:workstation_chef",
+    "artwork:workstation_designer",
+    "artwork:workstation_tanner",
+    "artwork:workstation_potter"
+  ]
+}

@@ -9,12 +9,10 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class WorkstationBlock extends AWBlock
 {
@@ -44,13 +42,13 @@ public class WorkstationBlock extends AWBlock
     // OVERRIDE ########################################################################################################
 
     @Override
-    protected @NonNull VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
+    protected @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context)
     {
         return SHAPE;
     }
 
     @Override
-    public @NonNull BlockEntity newBlockEntity(BlockPos worldPosition, BlockState blockState)
+    public BlockEntity newBlockEntity(@NotNull BlockPos worldPosition, @NotNull BlockState blockState)
     {
         return new WorkstationBlockEntity(worldPosition, blockState);
     }

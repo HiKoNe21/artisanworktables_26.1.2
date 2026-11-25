@@ -31,9 +31,9 @@ public final class AWBlocks
         register(AWEnumType.BLACKSMITH, SoundType.NETHERITE_BLOCK);
         register(AWEnumType.JEWELER, SoundType.AMETHYST);
         register(AWEnumType.BASIC, SoundType.WOOD);
-        register(AWEnumType.ENGINEER, SoundType.IRON);
+        register(AWEnumType.ENGINEER, SoundType.METAL);
         register(AWEnumType.MAGE, SoundType.ANCIENT_DEBRIS);
-        register(AWEnumType.SCRIBE, SoundType.SHELF);
+        register(AWEnumType.SCRIBE, SoundType.CHISELED_BOOKSHELF);
         register(AWEnumType.CHEMIST, SoundType.BONE_BLOCK);
         register(AWEnumType.FARMER, SoundType.GRAVEL);
         register(AWEnumType.CHEF, SoundType.CALCITE);

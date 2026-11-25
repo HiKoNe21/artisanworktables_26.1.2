@@ -14,7 +14,8 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
-import org.jspecify.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public abstract class ArtWorkCommon implements ArtWork
 {
@@ -39,8 +40,7 @@ public abstract class ArtWorkCommon implements ArtWork
         AWRecipeTypes.DR.register(modEventBus);
         AWRecipeSerializers.DR.register(modEventBus);
 
-        modEventBus.addListener(DataGenerator::gatherClientData);
-        modEventBus.addListener(DataGenerator::gatherServerData);
+        modEventBus.addListener(DataGenerator::gatherData);
 
         modEventBus.addListener(AWCreativeTabs::initExternal);
         modEventBus.addListener(AWCapabilityProviders::register);

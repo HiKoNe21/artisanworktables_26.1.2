@@ -8,16 +8,15 @@ import hikone.artwork.recipe.AWRecipe;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.*;
-import mezz.jei.api.recipe.types.IRecipeHolderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,7 @@ public class AWTransferHandler<M extends AWMenu> implements IRecipeTransferHandl
     private final MenuType<M> menuType;
     private final AWEnumTier recipeTier;
     private final AWEnumType recipeType;
-    private final IRecipeHolderType<AWRecipe> recipeHolderType;
+    private final RecipeType<RecipeHolder<AWRecipe>> jeiRecipeType;
 
     public AWTransferHandler(
             IRecipeTransferHandlerHelper transferHelper,
@@ -44,34 +43,34 @@ public class AWTransferHandler<M extends AWMenu> implements IRecipeTransferHandl
         this.menuType = menuType;
         this.recipeTier = recipeTier;
         this.recipeType = recipeType;
-        this.recipeHolderType = AWJEIPlugin.CATEGORY_KEYS.get(recipeTier).get(recipeType);
+        this.jeiRecipeType = AWJEIPlugin.CATEGORY_KEYS.get(recipeTier).get(recipeType);
     }
 
     @Override
-    public @NonNull Class<? extends M> getContainerClass()
+    public @NotNull Class<? extends M> getContainerClass()
     {
         return this.menuClass;
     }
 
     @Override
-    public @NonNull Optional<MenuType<M>> getMenuType()
+    public @NotNull Optional<MenuType<M>> getMenuType()
     {
         return Optional.ofNullable(this.menuType);
     }
 
     @Override
-    public @NonNull IRecipeHolderType<AWRecipe> getRecipeType()
+    public @NotNull RecipeType<RecipeHolder<AWRecipe>> getRecipeType()
     {
-        return this.recipeHolderType;
+        return this.jeiRecipeType;
     }
 
     @SuppressWarnings("removal")
     @Override
-    public @Nullable IRecipeTransferError transferRecipe(
-            @NonNull M container,
-            @NonNull RecipeHolder<AWRecipe> recipeHolder,
-            @NonNull IRecipeSlotsView recipeSlots,
-            @NonNull Player player,
+    public IRecipeTransferError transferRecipe(
+            @NotNull M container,
+            @NotNull RecipeHolder<AWRecipe> recipeHolder,
+            @NotNull IRecipeSlotsView recipeSlots,
+            @NotNull Player player,
             boolean maxTransfer,
             boolean doTransfer)
     {
@@ -200,7 +199,7 @@ public class AWTransferHandler<M extends AWMenu> implements IRecipeTransferHandl
 
         if (doTransfer)
         {
-            ClientPacketDistributor.sendToServer(new AWJeiTransferPayload(recipeHolder.id().identifier(), maxTransfer));
+            PacketDistributor.sendToServer(new AWJeiTransferPayload(recipeHolder.id(), maxTransfer));
         }
 
         return null;

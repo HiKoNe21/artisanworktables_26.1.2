@@ -3,7 +3,7 @@ package hikone.artwork.menu.slot;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -18,7 +18,7 @@ public class AWExtraResultSlot extends Slot
     }
 
     @Override
-    public boolean mayPlace(@NonNull ItemStack stack)
+    public boolean mayPlace(@NotNull ItemStack stack)
     {
         return false;
     }

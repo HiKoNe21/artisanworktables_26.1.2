@@ -10,12 +10,32 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import net.neoforged.neoforge.common.util.NeoForgeExtraCodecs;
-import org.jspecify.annotations.NonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public record AWSizedIngredient(SizedIngredient sizedIngredient, int damage, boolean catalyst)
 {
-    public static final Codec<AWSizedIngredient> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    Ingredient.CODEC.fieldOf("ingredient").forGetter(r -> r.sizedIngredient.ingredient()),
+    /**
+     * The "flat" codec for {@link AWSizedIngredient}.
+     *
+     * <p>With this codec, the count, damage, catalyst, is <i>always</i> serialized separately from the ingredient itself, for example:
+     *
+     * <pre>{@code
+     * {
+     *     "item": "minecraft:egg",
+     *     "count": 1,
+     *     "damage": 1,
+     *     "catalyst": true
+     * },
+     * {
+     *     "tag": "c:rods/wooden",
+     *     "count": 1,
+     *     "damage": 1,
+     *     "catalyst": true
+     * }
+     * }</pre>
+     */
+    public static final Codec<AWSizedIngredient> FLAT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    Ingredient.MAP_CODEC_NONEMPTY.forGetter(r -> r.sizedIngredient.ingredient()),
                     NeoForgeExtraCodecs.optionalFieldAlwaysWrite(ExtraCodecs.POSITIVE_INT, "count", 1)
                             .forGetter(r -> r.sizedIngredient.count()),
                     NeoForgeExtraCodecs.optionalFieldAlwaysWrite(ExtraCodecs.NON_NEGATIVE_INT, "damage", 0)
@@ -76,7 +96,8 @@ public record AWSizedIngredient(SizedIngredient sizedIngredient, int damage, boo
     @Override
     public @NonNull String toString()
     {
-        return "AWSizedIngredient{" + "sizedIngredient=" + this.sizedIngredient + ", damage=" + this.damage + ", catalyst=" + this.catalyst + '}';
+        return "AWSizedIngredient{" + "sizedIngredient=" + this.sizedIngredient + ", damage=" + this.damage +
+                ", catalyst=" + this.catalyst + '}';
     }
 
 }

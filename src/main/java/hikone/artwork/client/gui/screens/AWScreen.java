@@ -1,32 +1,32 @@
 package hikone.artwork.client.gui.screens;
 
 import hikone.artwork.ArtWork;
-import hikone.artwork.api.reference.AWEnumTier;
 import hikone.artwork.client.gui.components.AWFluidBar;
 import hikone.artwork.client.gui.components.AWGuiButton;
 import hikone.artwork.menu.AWMenu;
 import hikone.artwork.menu.slot.AWExtraResultSlot;
 import hikone.artwork.network.AWClearTablePayload;
 import hikone.artwork.util.GUIHelper;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import net.neoforged.neoforge.network.PacketDistributor;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 public abstract class AWScreen<S extends AWMenu> extends AbstractContainerScreen<S>
 {
-    protected static final Identifier CLEAR_TEXTURE = ArtWork.makeId("textures/gui/extra/clear.png");
+    protected static final ResourceLocation CLEAR_TEXTURE = ArtWork.makeId("textures/gui/extra/clear.png");
 
     // FIELDS ##########################################################################################################
 
-    protected final Identifier backgroundTexture;
+    protected final ResourceLocation backgroundTexture;
     protected final int textColor;
     protected AWFluidBar fluidBar;
 
@@ -34,13 +34,15 @@ public abstract class AWScreen<S extends AWMenu> extends AbstractContainerScreen
 
     public AWScreen(S menu, Inventory inventory, Component title)
     {
-        super(
-                menu, inventory, title, 176, switch (menu.getTableTier())
-                {
-                    case WORKTABLE -> 188;
-                    case WORKSTATION -> 206;
-                    case WORKSHOP -> 224;
-                });
+        super(menu, inventory, title);
+
+        this.imageWidth = 176;
+        this.imageHeight = switch (menu.getTableTier())
+        {
+            case WORKTABLE -> 188;
+            case WORKSTATION -> 206;
+            case WORKSHOP -> 224;
+        };
 
         var tableType = menu.getTableType();
         var tableTier = menu.getTableTier();
@@ -65,15 +67,20 @@ public abstract class AWScreen<S extends AWMenu> extends AbstractContainerScreen
         this.addRenderableWidget(
                 new AWGuiButton(
                         this.leftPos + xOffset, this.topPos + 16, 9, 9, CLEAR_TEXTURE, 0, 0, 9, 9, Component.translatable("gui.artwork.tooltip.clear_table"),
-                        _ -> ClientPacketDistributor.sendToServer(AWClearTablePayload.INSTANCE)));
+                        b -> PacketDistributor.sendToServer(AWClearTablePayload.INSTANCE)));
     }
 
     @Override
-    public void extractBackground(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a)
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float a)
     {
-        super.extractBackground(graphics, mouseX, mouseY, a);
+        super.render(graphics, mouseX, mouseY, a);
+        this.renderTooltip(graphics, mouseX, mouseY);
+    }
 
-        graphics.blit(RenderPipelines.GUI_TEXTURED, backgroundTexture, this.leftPos, this.topPos, 0.0F, 0.0F, 176, 224, 256, 256);
+    @Override
+    protected void renderBg(@NotNull GuiGraphics graphics, float a, int mouseX, int mouseY)
+    {
+        graphics.blit(backgroundTexture, this.leftPos, this.topPos, 0.0F, 0.0F, 176, 224, 256, 256);
 
         if (this.fluidBar != null)
         {
@@ -82,7 +89,7 @@ public abstract class AWScreen<S extends AWMenu> extends AbstractContainerScreen
     }
 
     @Override
-    protected void extractLabels(@NonNull GuiGraphicsExtractor graphics, int xm, int ym)
+    protected void renderLabels(@NonNull GuiGraphics graphics, int xm, int ym)
     {
         GUIHelper.drawStringOutlined(graphics, this.title, this.titleLabelX, this.titleLabelY, this.font, textColor);
         GUIHelper.drawStringOutlined(
@@ -108,7 +115,7 @@ public abstract class AWScreen<S extends AWMenu> extends AbstractContainerScreen
                 }
 
                 Component text = exp.getDisplayText();
-                int color = exp.getTextColor(this.minecraft.player);
+                int color = exp.getTextColor(this.minecraft != null ? this.minecraft.player : null);
 
                 graphics.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, 0x80555555);
 
@@ -123,20 +130,20 @@ public abstract class AWScreen<S extends AWMenu> extends AbstractContainerScreen
                 float textY = boxY + (boxHeight - scaledHeight) / 2.0f;
 
                 var pose = graphics.pose();
-                pose.pushMatrix();
-                pose.translate(textX, textY);
-                pose.scale(scale, scale);
+                pose.pushPose();
+                pose.translate(textX, textY, 0f);
+                pose.scale(scale, scale, 1f);
 
-                graphics.text(this.font, text, 0, 0, color, true);
+                graphics.drawString(this.font, text, 0, 0, color, true);
 
-                pose.popMatrix();
+                pose.popPose();
             }
         });
     }
 
     @Override
     protected void renderSlotContents(
-            @NonNull GuiGraphicsExtractor graphics, @NonNull ItemStack itemStack, @NonNull Slot slot,
+            @NonNull GuiGraphics graphics, @NonNull ItemStack itemStack, @NonNull Slot slot,
             @Nullable String itemCount)
     {
         super.renderSlotContents(graphics, itemStack, slot, itemCount);
@@ -146,8 +153,8 @@ public abstract class AWScreen<S extends AWMenu> extends AbstractContainerScreen
             ItemStack ghost = extraSlot.getGhostStack();
             if (!ghost.isEmpty())
             {
-                graphics.item(ghost, slot.x, slot.y);
-                graphics.itemDecorations(this.font, ghost, slot.x, slot.y);
+                graphics.renderItem(ghost, slot.x, slot.y);
+                graphics.renderItemDecorations(this.font, ghost, slot.x, slot.y);
 
                 graphics.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, 0x808B8B8B);
             }

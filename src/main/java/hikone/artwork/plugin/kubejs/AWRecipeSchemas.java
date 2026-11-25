@@ -15,13 +15,13 @@ import java.util.List;
 
 public final class AWRecipeSchemas
 {
-    public static final RecipeKey<ItemStack> RESULT = ItemStackComponent.ITEM_STACK.outputKey("result");
-    public static final RecipeKey<List<String>> PATTERN = StringComponent.STRING.asList().inputKey("pattern");
-    public static final RecipeKey<TinyMap<Character, Ingredient>> KEY = IngredientComponent.INGREDIENT.asPatternKey().inputKey("key");
-    public static final RecipeKey<List<Ingredient>> INGREDIENTS = IngredientComponent.INGREDIENT.asList().inputKey("ingredients");
+    public static final RecipeKey<ItemStack> RESULT = ItemStackComponent.ITEM_STACK.instance().outputKey("result");
+    public static final RecipeKey<List<String>> PATTERN = StringComponent.STRING.instance().asList().inputKey("pattern");
+    public static final RecipeKey<TinyMap<Character, Ingredient>> KEY = IngredientComponent.INGREDIENT.instance().asPatternKey().inputKey("key");
+    public static final RecipeKey<List<Ingredient>> INGREDIENTS = IngredientComponent.INGREDIENT.instance().asList().inputKey("ingredients");
 
     public static final RecipeKey<List<AWSizedIngredient>> SECONDARY = ListRecipeComponent.create(AWCodecComponent.SIZED_INGREDIENT, true, true).inputKey("secondary").defaultOptional();
-    public static final RecipeKey<SizedFluidIngredient> FLUID = SizedFluidIngredientComponent.OPTIONAL_SIZED_FLUID_INGREDIENT.otherKey("fluid").defaultOptional();
+    public static final RecipeKey<SizedFluidIngredient> FLUID = SizedFluidIngredientComponent.FLAT.otherKey("fluid").defaultOptional();
     public static final RecipeKey<List<AWItemStackTemplate>> EXTRA = ListRecipeComponent.create(AWCodecComponent.CHANCED_RESULT, true, true).outputKey("extra").defaultOptional();
     public static final RecipeKey<List<Integer>> TIER = ListRecipeComponent.create(NumberComponent.INT, true, false).otherKey("tier").defaultOptional();
     public static final RecipeKey<AWExperienceIngredient> EXPERIENCE = AWCodecComponent.EXPERIENCE.otherKey("experience").defaultOptional();

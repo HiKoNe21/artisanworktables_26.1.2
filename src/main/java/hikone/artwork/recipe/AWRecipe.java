@@ -14,11 +14,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Recipe;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public abstract class AWRecipe implements Recipe<AWCraftingInput>
     // FIELDS ##########################################################################################################
 
     protected final AWEnumType tableType;
-    protected final ItemStackTemplate result;
+    protected final ItemStack result;
     protected final List<AWSizedIngredient> secondary;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected final Optional<SizedFluidIngredient> fluid;
@@ -43,7 +43,7 @@ public abstract class AWRecipe implements Recipe<AWCraftingInput>
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected AWRecipe(
-            AWEnumType tableType, ItemStackTemplate result, List<AWSizedIngredient> secondary,
+            AWEnumType tableType, ItemStack result, List<AWSizedIngredient> secondary,
             Optional<SizedFluidIngredient> fluid, List<AWItemStackTemplate> extra, List<Integer> availableTiers,
             AWExperienceIngredient experience, Optional<Holder<SoundEvent>> sound)
     {
@@ -64,7 +64,7 @@ public abstract class AWRecipe implements Recipe<AWCraftingInput>
         return this.tableType;
     }
 
-    public ItemStackTemplate getResult()
+    public ItemStack getResult()
     {
         return this.result;
     }
@@ -99,9 +99,17 @@ public abstract class AWRecipe implements Recipe<AWCraftingInput>
         return this.sound;
     }
 
+    // OVERRIDES #######################################################################################################
+
+    @Override
+    public boolean isSpecial()
+    {
+        return true;
+    }
+
     // OTHERS ##########################################################################################################
 
-    public NonNullList<ItemStack> getRemainingItems(AWCraftingInput inventory)
+    public @NotNull NonNullList<ItemStack> getRemainingItems(AWCraftingInput inventory)
     {
         var remaining = NonNullList.withSize(9 + inventory.size(), ItemStack.EMPTY);
 
@@ -109,20 +117,20 @@ public abstract class AWRecipe implements Recipe<AWCraftingInput>
         for (int i = 0; i < 9; i++)
         {
             var item = secondary.get(i);
-            var remainder = item.getCraftingRemainder();
-            if (remainder != null)
+            var remainder = item.getCraftingRemainingItem();
+            if (!remainder.isEmpty())
             {
-                remaining.set(i, remainder.create());
+                remaining.set(i, remainder.copy());
             }
         }
 
         for (int i = 0; i < inventory.size(); ++i)
         {
             var item = inventory.getItem(i);
-            var remainder = item.getCraftingRemainder();
-            if (remainder != null)
+            var remainder = item.getCraftingRemainingItem();
+            if (!remainder.isEmpty())
             {
-                remaining.set(9 + i, remainder.create());
+                remaining.set(9 + i, remainder.copy());
             }
         }
 

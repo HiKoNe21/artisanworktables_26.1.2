@@ -18,19 +18,18 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 public abstract class AWBlockEntity extends BaseContainerBlockEntity
 {
     // FIELDS ##########################################################################################################
 
     protected NonNullList<ItemStack> items;
-    protected FluidStacksResourceHandler fluidHandler;
+    protected FluidTank fluidHandler;
 
     protected final AWEnumType type;
     protected final AWEnumTier tier;
@@ -45,13 +44,13 @@ public abstract class AWBlockEntity extends BaseContainerBlockEntity
         this.tier = block.getTableTier();
         this.items = NonNullList.withSize(9 + getGridSize() * getGridSize(), ItemStack.EMPTY);
         int capacity = AWServerConfig.getFluidCapacity(this.tier);
-        this.fluidHandler = new FluidStacksResourceHandler(1, capacity)
+        this.fluidHandler = new FluidTank(capacity)
         {
             @Override
-            protected void onContentsChanged(int index, @NonNull FluidStack previousContents)
+            protected void onContentsChanged()
             {
                 AWBlockEntity.this.setChanged();
-                if (level != null && !level.isClientSide())
+                if (level != null && !level.isClientSide)
                 {
                     level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
                 }
@@ -61,7 +60,7 @@ public abstract class AWBlockEntity extends BaseContainerBlockEntity
 
     // GETTERS #########################################################################################################
 
-    public FluidStacksResourceHandler getFluidHandler()
+    public FluidTank getFluidHandler()
     {
         return this.fluidHandler;
     }
@@ -90,20 +89,23 @@ public abstract class AWBlockEntity extends BaseContainerBlockEntity
     }
 
     @Override
-    protected void loadAdditional(@NonNull ValueInput input)
+    protected void loadAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries)
     {
-        super.loadAdditional(input);
+        super.loadAdditional(tag, registries);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(input, this.items);
-        input.child("Fluid").ifPresent(this.fluidHandler::deserialize);
+        ContainerHelper.loadAllItems(tag, this.items, registries);
+        if (tag.contains("Fluid"))
+        {
+            this.fluidHandler.readFromNBT(registries, tag.getCompound("Fluid"));
+        }
     }
 
     @Override
-    protected void saveAdditional(@NonNull ValueOutput output)
+    protected void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries)
     {
-        super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, this.items);
-        this.fluidHandler.serialize(output.child("Fluid"));
+        super.saveAdditional(tag, registries);
+        ContainerHelper.saveAllItems(tag, this.items, registries);
+        tag.put("Fluid", this.fluidHandler.writeToNBT(registries, new CompoundTag()));
     }
 
     @Override
@@ -122,20 +124,6 @@ public abstract class AWBlockEntity extends BaseContainerBlockEntity
     public int getContainerSize()
     {
         return this.items.size();
-    }
-
-    @Override
-    public void setItem(int slot, @NonNull ItemStack itemStack, boolean insideTransaction)
-    {
-        // skip
-        super.setItem(slot, itemStack, insideTransaction);
-    }
-
-    @Override
-    public boolean canPlaceItem(int slot, @NonNull ItemStack itemStack)
-    {
-        // skip
-        return true;
     }
 
     @Override

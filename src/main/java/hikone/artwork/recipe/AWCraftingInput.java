@@ -4,7 +4,7 @@ import hikone.artwork.api.reference.AWEnumTier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.neoforged.neoforge.fluids.FluidStack;
-import org.jspecify.annotations.NonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.List;
 import java.util.Objects;

@@ -6,19 +6,21 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
-import org.jspecify.annotations.NonNull;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
 public final class AWBlockTagsProvider extends BlockTagsProvider
 {
-    public AWBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider)
+    public AWBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper)
     {
-        super(output, lookupProvider, ArtWork.MODID);
+        super(output, lookupProvider, ArtWork.MODID, existingFileHelper);
     }
 
     @Override
-    protected void addTags(HolderLookup.@NonNull Provider registries)
+    protected void addTags(HolderLookup.@NotNull Provider registries)
     {
         var axeTag = this.tag(BlockTags.MINEABLE_WITH_AXE);
         var pickaxeTag = this.tag(BlockTags.MINEABLE_WITH_PICKAXE);

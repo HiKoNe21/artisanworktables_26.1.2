@@ -21,12 +21,13 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.handlers.IGuiClickableArea;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.recipe.types.IRecipeHolderType;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.*;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -34,9 +35,9 @@ import java.util.*;
 @JeiPlugin
 public class AWJEIPlugin implements IModPlugin
 {
-    public static final Identifier PLUGIN_UID = ArtWork.makeId("jei_plugin");
+    public static final ResourceLocation PLUGIN_UID = ArtWork.makeId("jei_plugin");
 
-    public static final Map<AWEnumTier, Map<AWEnumType, IRecipeHolderType<AWRecipe>>> CATEGORY_KEYS;
+    public static final Map<AWEnumTier, Map<AWEnumType, RecipeType<RecipeHolder<AWRecipe>>>> CATEGORY_KEYS;
 
     static
     {
@@ -46,13 +47,15 @@ public class AWJEIPlugin implements IModPlugin
             for (var tier : AWEnumTier.values())
             {
                 var map = CATEGORY_KEYS.computeIfAbsent(tier, t -> new EnumMap<>(AWEnumType.class));
-                map.put(type, IRecipeHolderType.create(ArtWork.makeId(tier.getName() + "_" + type.getName())));
+                @SuppressWarnings("unchecked")
+                var recipeClass = (Class<RecipeHolder<AWRecipe>>) (Class<?>) RecipeHolder.class;
+                map.put(type, new RecipeType<>(ArtWork.makeId(tier.getName() + "_" + type.getName()), recipeClass));
             }
         }
     }
 
     @Override
-    public void registerCategories(@NonNull IRecipeCategoryRegistration registration)
+    public void registerCategories(IRecipeCategoryRegistration registration)
     {
         IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
         for (var type : AWEnumType.values())
@@ -65,9 +68,10 @@ public class AWJEIPlugin implements IModPlugin
     }
 
     @Override
-    public void registerRecipes(@NonNull IRecipeRegistration registration)
+    public void registerRecipes(@NotNull IRecipeRegistration registration)
     {
-        var recipeManager = ArtWork.instance().getRecipeManager();
+        var level = Minecraft.getInstance().level;
+        var recipeManager = level != null ? level.getRecipeManager() : ArtWork.instance().getRecipeManager();
         if (recipeManager == null)
         {
             return;
@@ -84,8 +88,7 @@ public class AWJEIPlugin implements IModPlugin
                     case WORKSHOP -> 5;
                 };
 
-                Collection<RecipeHolder<AWRecipe>> recipeHolders = recipeManager.recipeMap().byType(
-                        AWRecipeTypes.get(type));
+                List<RecipeHolder<AWRecipe>> recipeHolders = recipeManager.getAllRecipesFor(AWRecipeTypes.get(type));
                 registration.addRecipes(
                         CATEGORY_KEYS.get(tier).get(type),
                         recipeHolders.stream().filter(holder -> fitsInTier(holder.value(), tier, maxGridSize)).toList());
@@ -94,20 +97,20 @@ public class AWJEIPlugin implements IModPlugin
     }
 
     @Override
-    public void registerRecipeCatalysts(@NonNull IRecipeCatalystRegistration registration)
+    public void registerRecipeCatalysts(@NotNull IRecipeCatalystRegistration registration)
     {
         for (var type : AWEnumType.values())
         {
             for (var tier : AWEnumTier.values())
             {
-                registration.addCraftingStation(CATEGORY_KEYS.get(tier).get(type), AWBlocks.get(type, tier));
+                registration.addRecipeCatalyst(AWBlocks.get(type, tier).toStack(), CATEGORY_KEYS.get(tier).get(type));
             }
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void registerRecipeTransferHandlers(@NonNull IRecipeTransferRegistration registration)
+    public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration)
     {
         var transferHelper = registration.getTransferHelper();
 
@@ -153,14 +156,14 @@ public class AWJEIPlugin implements IModPlugin
     }
 
     @Override
-    public void registerGuiHandlers(@NonNull IGuiHandlerRegistration registration)
+    public void registerGuiHandlers(IGuiHandlerRegistration registration)
     {
         registration.addGuiContainerHandler(
                 WorktableScreen.class, new IGuiContainerHandler<>()
                 {
                     @Override
-                    public @NonNull Collection<IGuiClickableArea> getGuiClickableAreas(
-                            @NonNull WorktableScreen containerScreen, double guiMouseX, double guiMouseY)
+                    public @NotNull Collection<IGuiClickableArea> getGuiClickableAreas(
+                            @NotNull WorktableScreen containerScreen, double guiMouseX, double guiMouseY)
                     {
                         var tableType = containerScreen.getMenu().getTableType();
                         var result = new ArrayList<IGuiClickableArea>();
@@ -174,8 +177,8 @@ public class AWJEIPlugin implements IModPlugin
                 WorkstationScreen.class, new IGuiContainerHandler<>()
                 {
                     @Override
-                    public @NonNull Collection<IGuiClickableArea> getGuiClickableAreas(
-                            @NonNull WorkstationScreen containerScreen, double guiMouseX, double guiMouseY)
+                    public @NotNull Collection<IGuiClickableArea> getGuiClickableAreas(
+                            @NotNull WorkstationScreen containerScreen, double guiMouseX, double guiMouseY)
                     {
                         var tableType = containerScreen.getMenu().getTableType();
                         var result = new ArrayList<IGuiClickableArea>();
@@ -189,8 +192,8 @@ public class AWJEIPlugin implements IModPlugin
                 WorkshopScreen.class, new IGuiContainerHandler<>()
                 {
                     @Override
-                    public @NonNull Collection<IGuiClickableArea> getGuiClickableAreas(
-                            @NonNull WorkshopScreen containerScreen, double guiMouseX, double guiMouseY)
+                    public @NotNull Collection<IGuiClickableArea> getGuiClickableAreas(
+                            @NotNull WorkshopScreen containerScreen, double guiMouseX, double guiMouseY)
                     {
                         var tableType = containerScreen.getMenu().getTableType();
                         var result = new ArrayList<IGuiClickableArea>();
@@ -204,7 +207,7 @@ public class AWJEIPlugin implements IModPlugin
 
     @Nonnull
     @Override
-    public Identifier getPluginUid()
+    public ResourceLocation getPluginUid()
     {
         return PLUGIN_UID;
     }

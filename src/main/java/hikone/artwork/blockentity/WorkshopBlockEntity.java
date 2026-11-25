@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class WorkshopBlockEntity extends AWBlockEntity
 {
@@ -27,7 +27,7 @@ public class WorkshopBlockEntity extends AWBlockEntity
     }
 
     @Override
-    protected @NonNull AbstractContainerMenu createMenu(int containerId, @NonNull Inventory inventory)
+    protected @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inventory)
     {
         return new WorkshopMenu(containerId, inventory, this);
     }

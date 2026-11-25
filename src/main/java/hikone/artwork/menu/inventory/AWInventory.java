@@ -1,11 +1,12 @@
 package hikone.artwork.menu.inventory;
 
-import com.google.common.collect.Lists;
 import hikone.artwork.init.AWRecipeTypes;
 import hikone.artwork.menu.AWMenu;
 import hikone.artwork.recipe.AWCraftingInput;
 import hikone.artwork.recipe.format.AWSizedIngredient;
 import hikone.artwork.recipe.AWRecipe;
+import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -14,8 +15,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.transfer.transaction.Transaction;
-import org.jspecify.annotations.NonNull;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -92,9 +94,14 @@ public class AWInventory extends TransientCraftingContainer
     }
 
     @Override
-    public @NonNull List<ItemStack> getItems()
+    public @NotNull List<ItemStack> getItems()
     {
-        return Lists.newArrayList(this.container.iterator());
+        NonNullList<ItemStack> items = NonNullList.withSize(this.container.getContainerSize(), ItemStack.EMPTY);
+        for (int i = 0; i < this.container.getContainerSize(); i++)
+        {
+            items.set(i, this.container.getItem(i));
+        }
+        return items;
     }
 
     // OTHERS ##########################################################################################################
@@ -133,7 +140,8 @@ public class AWInventory extends TransientCraftingContainer
         var level = sPlayer.level();
 
         var input = asCraftingInput();
-        var maybeRecipe = level.recipeAccess().getRecipeFor(AWRecipeTypes.get(this.menu.getTableType()), input, level);
+        var maybeRecipe = level.getRecipeManager().getRecipeFor(
+                AWRecipeTypes.get(this.menu.getTableType()), input, level);
         if (maybeRecipe.isEmpty())
         {
             return;
@@ -149,7 +157,9 @@ public class AWInventory extends TransientCraftingContainer
         long gameTime = sPlayer.level().getGameTime();
         if (this.lastSoundTime != gameTime)
         {
-            recipe.playCraftSound(sPlayer.level(), this.menu.getBlockEntity() != null ? this.menu.getBlockEntity().getBlockPos() : sPlayer.blockPosition());
+            recipe.playCraftSound(
+                    (ServerLevel) sPlayer.level(), this.menu.getBlockEntity() != null ? this.menu.getBlockEntity()
+                            .getBlockPos() : sPlayer.blockPosition());
             this.lastSoundTime = gameTime;
         }
     }
@@ -238,7 +248,7 @@ public class AWInventory extends TransientCraftingContainer
                         }
 
                         slotStack.hurtAndBreak(
-                                neededDamage, player.level(), player, (_) -> player.level().playSound(
+                                neededDamage, (ServerLevel) player.level(), player, (i) -> player.level().playSound(
                                         null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BREAK,
                                         SoundSource.PLAYERS, 1.0F, 1.0F));
                         this.setItem(secIdx, slotStack);
@@ -295,19 +305,16 @@ public class AWInventory extends TransientCraftingContainer
         var fluidIngredient = fluidIngredientOpt.get();
         var handler = menu.getFluidHandler();
 
-        var resourceInTank = handler.getResource(0);
         int amountToExtract = fluidIngredient.amount();
+        FluidStack fluidInTank = handler.getFluidInTank(0);
 
-        if (!resourceInTank.isEmpty() && fluidIngredient.test(input.getFluid()))
+        if (!fluidInTank.isEmpty() && fluidIngredient.test(input.getFluid()))
         {
-            try (Transaction tx = Transaction.openRoot())
-            {
-                int extracted = handler.extract(0, resourceInTank, amountToExtract, tx);
+            FluidStack simulated = handler.drain(amountToExtract, IFluidHandler.FluidAction.SIMULATE);
 
-                if (extracted == amountToExtract)
-                {
-                    tx.commit();
-                }
+            if (simulated.getAmount() == amountToExtract)
+            {
+                handler.drain(amountToExtract, IFluidHandler.FluidAction.EXECUTE);
             }
         }
     }

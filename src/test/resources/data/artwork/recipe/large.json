@@ -1,0 +1,29 @@
+{
+    "type": "artwork:blacksmith_shaped",
+    "key": {
+        "I": {
+            "item": "minecraft:iron_ingot"
+        }
+    },
+    "pattern": [
+        "IIIII"
+    ],
+    "extra": [
+        {
+            "id": "minecraft:diamond"
+        },
+        {
+            "id": "minecraft:diamond",
+            "chance": 0.5
+        },
+        {
+            "id": "minecraft:diamond",
+            "count": 2,
+            "chance": 0.2
+        }
+    ],
+    "result": {
+        "count": 1,
+        "id": "minecraft:diamond"
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "type": "artwork:basic_shapeless",
+    "ingredients": [
+        {
+            "item": "minecraft:bucket"
+        }
+    ],
+    "fluid": {
+        "fluid": "minecraft:lava",
+        "amount": 500
+    },
+    "experience": {
+        "required": 30,
+        "consume": 3
+    },
+    "result": {
+        "id": "minecraft:lava_bucket",
+        "count": 1
+    }
+}

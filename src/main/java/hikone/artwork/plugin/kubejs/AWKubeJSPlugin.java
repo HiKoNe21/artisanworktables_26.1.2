@@ -5,20 +5,19 @@ import dev.latvian.mods.kubejs.recipe.component.RecipeComponentTypeRegistry;
 import dev.latvian.mods.kubejs.recipe.schema.RecipeSchemaRegistry;
 import hikone.artwork.ArtWork;
 import hikone.artwork.api.reference.AWEnumType;
-import org.jspecify.annotations.NonNull;
 
 public class AWKubeJSPlugin implements KubeJSPlugin
 {
     @Override
-    public void registerRecipeComponents(@NonNull RecipeComponentTypeRegistry registry)
+    public void registerRecipeComponents(RecipeComponentTypeRegistry registry)
     {
-        registry.unit(AWCodecComponent.SIZED_INGREDIENT);
-        registry.unit(AWCodecComponent.CHANCED_RESULT);
-        registry.unit(AWCodecComponent.EXPERIENCE);
+        registry.register(AWCodecComponent.SIZED_INGREDIENT_TYPE);
+        registry.register(AWCodecComponent.CHANCED_RESULT_TYPE);
+        registry.register(AWCodecComponent.EXPERIENCE_TYPE);
     }
 
     @Override
-    public void registerRecipeSchemas(@NonNull RecipeSchemaRegistry registry)
+    public void registerRecipeSchemas(RecipeSchemaRegistry registry)
     {
         var namespace = registry.namespace(ArtWork.MODID);
         for (var type : AWEnumType.values())

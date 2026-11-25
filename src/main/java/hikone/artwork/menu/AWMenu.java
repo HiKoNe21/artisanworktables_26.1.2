@@ -12,7 +12,6 @@ import hikone.artwork.recipe.AWRecipe;
 import hikone.artwork.recipe.AWShapedRecipe;
 import hikone.artwork.recipe.AWShapelessRecipe;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -24,10 +23,10 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.transfer.fluid.FluidStacksResourceHandler;
-import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +57,7 @@ public abstract class AWMenu extends AbstractContainerMenu
     protected static final int USE_ROW_SLOT_COUNT = 9;
     protected int USE_ROW_SLOT_END;
 
-    protected static final FluidStacksResourceHandler EMPTY_FLUID_HANDLER = new FluidStacksResourceHandler(1, 0);
+    protected static final IFluidHandler EMPTY_FLUID_HANDLER = EmptyFluidHandler.INSTANCE;
 
     // FIELDS ##########################################################################################################
 
@@ -175,7 +174,7 @@ public abstract class AWMenu extends AbstractContainerMenu
         return blockEntity;
     }
 
-    public FluidStacksResourceHandler getFluidHandler()
+    public IFluidHandler getFluidHandler()
     {
         if (this.blockEntity == null)
         {
@@ -201,19 +200,12 @@ public abstract class AWMenu extends AbstractContainerMenu
 
     public FluidStack getFluid()
     {
-        var handler = this.getFluidHandler();
-        int amount = handler.getAmountAsInt(0);
-        if (amount <= 0)
-        {
-            return FluidStack.EMPTY;
-        }
-        return handler.getResource(0).toStack(amount);
+        return this.getFluidHandler().getFluidInTank(0);
     }
 
     public int getFluidCapacity()
     {
-        var handler = this.getFluidHandler();
-        return handler.getCapacityAsInt(0, handler.getResource(0));
+        return this.getFluidHandler().getTankCapacity(0);
     }
 
     public SimpleContainer getExtra()
@@ -239,7 +231,7 @@ public abstract class AWMenu extends AbstractContainerMenu
         }
         else
         {
-            return ((ServerLevel) this.level).recipeAccess().getRecipeFor(
+            return this.level.getRecipeManager().getRecipeFor(
                     AWRecipeTypes.get(getTableType()), input, this.level).map(RecipeHolder::value);
         }
     }
@@ -255,14 +247,14 @@ public abstract class AWMenu extends AbstractContainerMenu
         }
 
         var input = inventory.asCraftingInput();
-        var maybeRecipe = ((ServerLevel) this.level).recipeAccess().getRecipeFor(
+        var maybeRecipe = this.level.getRecipeManager().getRecipeFor(
                 AWRecipeTypes.get(getTableType()), input, this.level);
 
         var result = ItemStack.EMPTY;
         if (maybeRecipe.isPresent())
         {
             var recipe = maybeRecipe.get().value();
-            var recipeResult = recipe.assemble(input);
+            var recipeResult = recipe.assemble(input, level.registryAccess());
             if (recipeResult.isItemEnabled(this.level.enabledFeatures()))
             {
                 result = recipeResult;
@@ -295,7 +287,7 @@ public abstract class AWMenu extends AbstractContainerMenu
             clicked = stack.copy();
             if (slotIndex == RESULT_SLOT_START)
             {
-                stack.getItem().onCraftedBy(stack, player);
+                stack.getItem().onCraftedBy(stack, player.level(), player);
                 if (!this.moveItemStackTo(stack, INV_SLOT_START, USE_ROW_SLOT_END, true))
                 {
                     return ItemStack.EMPTY;
@@ -365,6 +357,24 @@ public abstract class AWMenu extends AbstractContainerMenu
 
     // OTHERS ##########################################################################################################
 
+    protected void addStandardInventorySlots(Container playerInventory, int leftCol, int topRow)
+    {
+        // Основной инвентарь игрока (3 ряда по 9 слотов: индексы 9..35)
+        for (int row = 0; row < 3; ++row)
+        {
+            for (int col = 0; col < 9; ++col)
+            {
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, leftCol + col * 18, topRow + row * 18));
+            }
+        }
+
+        // Хотбар игрока (9 слотов: индексы 0..8, на 58 пикселей ниже начала основного инвентаря)
+        for (int col = 0; col < 9; ++col)
+        {
+            this.addSlot(new Slot(playerInventory, col, leftCol + col * 18, topRow + 58));
+        }
+    }
+
     protected void addGridSlots(Container container, int indexStart, int width, int height, int left, int top)
     {
         int index = indexStart;
@@ -388,7 +398,7 @@ public abstract class AWMenu extends AbstractContainerMenu
                 this.addSlot(new AWExtraResultSlot(
                         outputContainer, index++, left + x * 18, top + y * 18, () -> this.getCurrentRecipe().map(
                         AWRecipe::getExtra).filter(list -> slotIdx < list.size()).map(list -> list.get(slotIdx).result()
-                        .create()).orElse(ItemStack.EMPTY)));
+                        .copy()).orElse(ItemStack.EMPTY)));
             }
         }
     }
@@ -398,14 +408,10 @@ public abstract class AWMenu extends AbstractContainerMenu
         if (this.blockEntity != null)
         {
             var handler = this.blockEntity.getFluidHandler();
-            int amount = handler.getAmountAsInt(0);
+            int amount = handler.getFluidInTank(0).getAmount();
             if (amount > 0)
             {
-                try (var tx = Transaction.openRoot())
-                {
-                    handler.extract(0, handler.getResource(0), amount, tx);
-                    tx.commit();
-                }
+                handler.drain(amount, IFluidHandler.FluidAction.EXECUTE);
                 this.slotsChanged(this.inventory);
             }
         }
@@ -499,7 +505,7 @@ public abstract class AWMenu extends AbstractContainerMenu
                     }
 
                     Slot targetSlot = gridSlots.get(x + y * this.gridSize);
-                    if (tryPlaceOneItem(optIngredient.get(), targetSlot, playerInv))
+                    if (tryPlaceOneItem(optIngredient, targetSlot, playerInv))
                     {
                         placedAnyInPass = true;
                     }

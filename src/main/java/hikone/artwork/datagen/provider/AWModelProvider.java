@@ -1,26 +1,20 @@
 package hikone.artwork.datagen.provider;
 
 import hikone.artwork.ArtWork;
-import hikone.artwork.api.reference.AWEnumTier;
-import hikone.artwork.api.reference.AWEnumType;
-import hikone.artwork.block.AWBlock;
 import hikone.artwork.init.AWBlocks;
-import net.minecraft.client.data.models.BlockModelGenerators;
-import net.minecraft.client.data.models.ItemModelGenerators;
-import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
-public class AWModelProvider extends ModelProvider
+public class AWModelProvider extends BlockStateProvider
 {
-    public AWModelProvider(PackOutput output)
+    public AWModelProvider(PackOutput output, ExistingFileHelper existingFileHelper)
     {
-        super(output, ArtWork.MODID);
+        super(output, ArtWork.MODID, existingFileHelper);
     }
 
     @Override
-    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels)
+    protected void registerStatesAndModels()
     {
         for (var tierMap : AWBlocks.BLOCKS.values())
         {
@@ -31,10 +25,8 @@ public class AWModelProvider extends ModelProvider
                 var split = blockName.split("_");
                 var modelLocation = ArtWork.makeId("block/" + split[1] + "/" + split[0]);
 
-                blockModels.blockStateOutput.accept(BlockModelGenerators.createSimpleBlock(
-                        block,
-                        BlockModelGenerators.plainVariant(modelLocation)));
-                blockModels.registerSimpleItemModel(block.asItem(), modelLocation);
+                var model = models().getExistingFile(modelLocation);
+                simpleBlockWithItem(block, model);
             }
         }
     }

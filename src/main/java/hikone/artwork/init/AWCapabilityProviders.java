@@ -8,8 +8,8 @@ public final class AWCapabilityProviders
 {
     public static void register(RegisterCapabilitiesEvent event)
     {
-        event.registerBlockEntity(Capabilities.Fluid.BLOCK, AWBlockEntities.get(AWEnumTier.WORKTABLE).get(), (blockEntity, side) -> blockEntity.getFluidHandler());
-        event.registerBlockEntity(Capabilities.Fluid.BLOCK, AWBlockEntities.get(AWEnumTier.WORKSTATION).get(), (blockEntity, side) -> blockEntity.getFluidHandler());
-        event.registerBlockEntity(Capabilities.Fluid.BLOCK, AWBlockEntities.get(AWEnumTier.WORKSHOP).get(), (blockEntity, side) -> blockEntity.getFluidHandler());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, AWBlockEntities.get(AWEnumTier.WORKTABLE).get(), (blockEntity, side) -> blockEntity.getFluidHandler());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, AWBlockEntities.get(AWEnumTier.WORKSTATION).get(), (blockEntity, side) -> blockEntity.getFluidHandler());
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, AWBlockEntities.get(AWEnumTier.WORKSHOP).get(), (blockEntity, side) -> blockEntity.getFluidHandler());
     }
 }

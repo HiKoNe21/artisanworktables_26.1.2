@@ -1,7 +1,7 @@
 package hikone.artwork;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeManager;
 import org.slf4j.Logger;
 
@@ -17,9 +17,9 @@ public interface ArtWork
         return ArtWorkCommon.INSTANCE;
     }
 
-    static Identifier makeId(String path)
+    static ResourceLocation makeId(String path)
     {
-        return Identifier.fromNamespaceAndPath(MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
     }
 
     @Nullable

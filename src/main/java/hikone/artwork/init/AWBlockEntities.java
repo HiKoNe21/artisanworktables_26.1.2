@@ -1,31 +1,23 @@
 package hikone.artwork.init;
 
 import hikone.artwork.ArtWork;
-import hikone.artwork.api.ids.AWBlockEntityIds;
-import hikone.artwork.api.ids.AWBlockIds;
 import hikone.artwork.api.reference.AWEnumTier;
-import hikone.artwork.api.reference.AWEnumType;
-import hikone.artwork.block.AWBlock;
 import hikone.artwork.blockentity.AWBlockEntity;
 import hikone.artwork.blockentity.WorkshopBlockEntity;
 import hikone.artwork.blockentity.WorkstationBlockEntity;
 import hikone.artwork.blockentity.WorktableBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public final class AWBlockEntities
 {
@@ -58,7 +50,7 @@ public final class AWBlockEntities
                     .map(DeferredHolder::get)
                     .toArray(Block[]::new);
 
-            return new BlockEntityType<>(factory::create, validBlocks);
+            return BlockEntityType.Builder.of(factory::create, validBlocks).build(null);
         });
 
         @SuppressWarnings("unchecked")

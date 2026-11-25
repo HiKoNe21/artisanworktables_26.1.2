@@ -13,28 +13,27 @@ import java.util.Set;
 
 public class DataGenerator
 {
-    public static void gatherClientData(GatherDataEvent.Client event)
-    {
-        var generator = event.getGenerator();
-        var pack = generator.getVanillaPack(true);
-
-        pack.addProvider(AWModelProvider::new);
-    }
-
-    public static void gatherServerData(GatherDataEvent.Server event)
+    public static void gatherData(GatherDataEvent event)
     {
         var generator = event.getGenerator();
         var pack = generator.getVanillaPack(true);
         var lookupProvider = event.getLookupProvider();
+        var existingFileHelper = event.getExistingFileHelper();
 
+        // Клиентские провайдеры (модели и blockstates)
+        pack.addProvider(output -> new AWModelProvider(output, existingFileHelper));
+
+        // Серверные провайдеры (лут-таблицы и теги)
         pack.addProvider(output -> new LootTableProvider(
-                output,
-                Set.of(),
-                List.of(new LootTableProvider.SubProviderEntry(AWBlockLootSubProvider::new, LootContextParamSets.BLOCK)),
-                event.getLookupProvider()));
+                output, Set.of(), List.of(new LootTableProvider.SubProviderEntry(
+                AWBlockLootSubProvider::new,
+                LootContextParamSets.BLOCK)), lookupProvider));
 
-        pack.addProvider(output -> new AWBlockTagsProvider(output, lookupProvider));
+        var blockTagsProvider = pack.addProvider(
+                output -> new AWBlockTagsProvider(output, lookupProvider, existingFileHelper));
 
-        pack.addProvider(output -> new AWItemTagsProvider(output, lookupProvider));
+        pack.addProvider(output -> new AWItemTagsProvider(
+                output, lookupProvider, blockTagsProvider.contentsGetter(),
+                existingFileHelper));
     }
 }

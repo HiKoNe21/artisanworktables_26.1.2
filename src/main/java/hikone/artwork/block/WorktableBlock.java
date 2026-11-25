@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class WorktableBlock extends AWBlock
 {
@@ -52,13 +52,13 @@ public class WorktableBlock extends AWBlock
     // OVERRIDE ########################################################################################################
 
     @Override
-    protected @NonNull VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
+    protected @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context)
     {
         return SHAPE;
     }
 
     @Override
-    public @NonNull BlockEntity newBlockEntity(BlockPos worldPosition, BlockState blockState)
+    public BlockEntity newBlockEntity(@NotNull BlockPos worldPosition, @NotNull BlockState blockState)
     {
         return new WorktableBlockEntity(worldPosition, blockState);
     }

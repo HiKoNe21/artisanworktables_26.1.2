@@ -10,48 +10,35 @@ import hikone.artwork.ArtWork;
 import hikone.artwork.recipe.format.AWExperienceIngredient;
 import hikone.artwork.recipe.format.AWItemStackTemplate;
 import hikone.artwork.recipe.format.AWSizedIngredient;
-import net.minecraft.resources.ResourceKey;
-import org.jspecify.annotations.NonNull;
 
-public record AWCodecComponent<T>(ResourceKey<RecipeComponentType<?>> type, Codec<T> codec,
-                                  TypeInfo typeInfo) implements RecipeComponent<T>
+public record AWCodecComponent<T>(
+        RecipeComponentType<?> type,
+        Codec<T> codec,
+        TypeInfo typeInfo
+) implements RecipeComponent<T>
 {
-    public static final AWCodecComponent<AWSizedIngredient> SIZED_INGREDIENT = create(
-            "sized_ingredient", AWSizedIngredient.CODEC, AWSizedIngredient.class);
+    public static final RecipeComponentType<AWSizedIngredient> SIZED_INGREDIENT_TYPE = RecipeComponentType.unit(
+            ArtWork.makeId("sized_ingredient"),
+            type -> new AWCodecComponent<>(type, AWSizedIngredient.FLAT_CODEC, TypeInfo.of(AWSizedIngredient.class))
+    );
 
-    public static final AWCodecComponent<AWItemStackTemplate> CHANCED_RESULT = create(
-            "chanced_result", AWItemStackTemplate.CODEC, AWItemStackTemplate.class);
+    public static final RecipeComponentType<AWItemStackTemplate> CHANCED_RESULT_TYPE = RecipeComponentType.unit(
+            ArtWork.makeId("chanced_result"),
+            type -> new AWCodecComponent<>(type, AWItemStackTemplate.CODEC, TypeInfo.of(AWItemStackTemplate.class))
+    );
 
-    public static final AWCodecComponent<AWExperienceIngredient> EXPERIENCE = create(
-            "experience", AWExperienceIngredient.CODEC, AWExperienceIngredient.class);
+    public static final RecipeComponentType<AWExperienceIngredient> EXPERIENCE_TYPE = RecipeComponentType.unit(
+            ArtWork.makeId("experience"),
+            type -> new AWCodecComponent<>(type, AWExperienceIngredient.CODEC, TypeInfo.of(AWExperienceIngredient.class))
+    );
 
-    public static <T> AWCodecComponent<T> create(String name, Codec<T> codec, Class<T> clazz)
-    {
-        var key = ResourceKey.create(RecipeComponentType.REGISTRY_KEY, ArtWork.makeId(name));
-        return new AWCodecComponent<>(key, codec, TypeInfo.of(clazz));
-    }
-
-    @Override
-    public @NonNull ResourceKey<RecipeComponentType<?>> type()
-    {
-        return this.type;
-    }
-
-    @Override
-    public @NonNull Codec<T> codec()
-    {
-        return this.codec;
-    }
-
-    @Override
-    public @NonNull TypeInfo typeInfo()
-    {
-        return this.typeInfo;
-    }
+    public static final RecipeComponent<AWSizedIngredient> SIZED_INGREDIENT = SIZED_INGREDIENT_TYPE.instance();
+    public static final RecipeComponent<AWItemStackTemplate> CHANCED_RESULT = CHANCED_RESULT_TYPE.instance();
+    public static final RecipeComponent<AWExperienceIngredient> EXPERIENCE = EXPERIENCE_TYPE.instance();
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NonNull T wrap(@NonNull RecipeScriptContext cx, Object from)
+    public T wrap(RecipeScriptContext cx, Object from)
     {
         if (this.typeInfo.asClass().isInstance(from))
         {

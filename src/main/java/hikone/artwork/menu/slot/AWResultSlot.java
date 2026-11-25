@@ -5,7 +5,8 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.jspecify.annotations.NonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class AWResultSlot extends Slot
 {
@@ -52,7 +53,7 @@ public class AWResultSlot extends Slot
     }
 
     @Override
-    protected void onQuickCraft(@NonNull ItemStack picked, int count)
+    protected void onQuickCraft(@NotNull ItemStack picked, int count)
     {
         this.removeCount += count;
         this.checkTakeAchievements(picked);
@@ -67,7 +68,7 @@ public class AWResultSlot extends Slot
     @Override
     protected void checkTakeAchievements(ItemStack carried)
     {
-        carried.onCraftedBy(this.inventory.getMenu().getPlayer(), this.removeCount);
+        carried.onCraftedBy(this.inventory.getMenu().getPlayer().level(), this.inventory.getMenu().getPlayer(), this.removeCount);
         this.removeCount = 0;
     }
 }

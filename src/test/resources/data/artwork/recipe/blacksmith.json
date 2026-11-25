@@ -1,0 +1,19 @@
+{
+    "type": "artwork:blacksmith_shapeless",
+    "ingredients": [
+        {
+            "item": "minecraft:iron_ingot"
+        },
+        {
+            "item": "minecraft:iron_ingot"
+        }
+    ],
+    "fluid": {
+        "fluid": "minecraft:lava",
+        "amount": 250
+    },
+    "result": {
+        "id": "minecraft:bucket",
+        "count": 1
+    }
+}
